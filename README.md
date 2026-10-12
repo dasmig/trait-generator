@@ -15,17 +15,21 @@ Personality traits from a weighted catalogue with conflicts, synergies and Big F
 
 ## Features
 
+- **Coherent Personalities**. Traits are drawn one at a time: traits that conflict with one already chosen (brave and cowardly, calm and anxious) are skipped, and synergies (kind and generous, shy and quiet) make related traits likelier.
+
+- **Big Five Axes**. Each person draws openness, conscientiousness, extraversion, agreeableness and neuroticism, and traits that match them are likelier: a conscientious person tends to be organized. The chosen traits then shift the axes, giving a resolved vector a game AI can read.
+
+- **A Catalogue That Is Data**. 52 curated traits with groups, tags, axis loadings and relations, in four TSV tables. A game adds its own traits, axes (for example "risk taking" for a utility AI) and relations as layers, without touching the library.
+
+- **Requests**. Ask for any number of traits, force some in (`include`) and keep others out (`exclude`); the rest stay consistent with them.
+
 - **Deterministic Seeding**. Per-call `get_personality(seed)` for reproducible results, generator-level `seed()` / `unseed()` for deterministic sequences, and `personality::seed()` for replaying a previous generation.
 
-- **Identical Everywhere**. A seed gives the same result on every compiler, standard library and CPU (GCC, Clang, MSVC, Emscripten; x86-64 and ARM64), checked by known-answer tests.
-
-- **Extensible Data**. Load your own TSV layers on top of the shipped data to add, change or remove entries (`extend()`), checked before they are applied.
+- **Identical Everywhere**. A seed gives the same personality on every compiler, standard library and CPU (GCC, Clang, MSVC, Emscripten; x86-64 and ARM64), checked by known-answer tests.
 
 - **JSON and Replay**. `to_json()` on every result, and a `signature()` recording the seed and the data it came from.
 
-- **Compiled-in Data**. Define `DASMIG_TRAIT_EMBED` to build the `lite` tier into the program, for WebAssembly and other builds without files.
-
-- **Multi-Instance Support**. Construct independent `trtg` instances with their own data and random engine.
+- **Compiled-in Data**. Define `DASMIG_TRAIT_EMBED` to build the catalogue into the program, for WebAssembly and other builds without files.
 
 ## Integration
 
@@ -43,24 +47,30 @@ to the files you want to use it in, and supply the [`resources`](https://github.
 #include <dasmig/traitgen.hpp>
 #include <iostream>
 
-auto& gen = dasmig::trtg::instance(); // loads the lite tier
+auto& gen = dasmig::trtg::instance(); // loads the catalogue
 
-auto v = gen.get_personality();
-std::cout << v << '\n';           // the label
-std::cout << v.to_json() << '\n'; // {"key":...,"label":...,"signature":{...}}
+auto p = gen.get_personality();       // three traits
+std::cout << p << '\n';               // "Calm, Resilient, Traditional"
+p.has("brave");                       // false
+p.value("neuroticism");               // resolved axis value
+p.tags();                             // {"rest", "survival", "willpower", ...}
 
-// The same seed gives the same result everywhere.
-auto again = gen.get_personality(v.seed());
+// Five traits, one forced in, one kept out.
+auto q = gen.get_personality({.count = 5, .include = {"brave"}, .exclude = {"greedy"}});
+
+// The same seed gives the same personality everywhere.
+auto again = gen.get_personality(p.seed());
+std::cout << again.to_json() << '\n';
 ```
 
-See the [usage guide](doc/usage.md) for everything else.
+See the [usage guide](doc/usage.md) for extending the catalogue and the generation model in detail.
 
 ## Building
 
 ```bash
 make            # example
 make test       # tests
-make test-embed # tests with the lite tier compiled in
+make test-embed # tests with the catalogue compiled in
 make coverage   # code coverage
 make lint       # clang-tidy
 make docs       # API docs
@@ -81,6 +91,18 @@ Tested with:
 |-----------|---------|---------|---------|
 | [dasmig-core](https://github.com/dasmig/dasmig-core) | 1.0 | Yes (`core.hpp`, `core/`) | Platform-independent random engine and distributions, data layers, JSON |
 | [Catch2](https://github.com/catchorg/Catch2) | 3.x | Yes (amalgamated) | Unit testing |
+
+## Related Libraries
+
+| Library | Description |
+|---------|-------------|
+| [name-generator](https://github.com/dasmig/name-generator) | Culturally appropriate full names |
+| [nickname-generator](https://github.com/dasmig/nickname-generator) | Gamer-style nicknames |
+| [birth-generator](https://github.com/dasmig/birth-generator) | Demographically plausible birthdays |
+| [biodata-generator](https://github.com/dasmig/biodata-generator) | Height, weight and physical traits |
+| [city-generator](https://github.com/dasmig/city-generator) | Weighted city selection by population |
+| [country-generator](https://github.com/dasmig/country-generator) | Weighted country selection by population |
+| [entity-generator](https://github.com/dasmig/entity-generator) | ECS-based entity generation |
 
 ## License
 

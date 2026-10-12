@@ -1,0 +1,53 @@
+# Relations between traits (curated; see doc/data.md), applied both ways.
+# conflict: the two never appear together (traits in the same group conflict
+# without a row here). synergy: once one is chosen, the other's weight is
+# multiplied by factor.
+trait	other	relation	factor
+reckless	cautious	conflict
+impulsive	disciplined	conflict
+impulsive	patient	conflict
+bold	shy	conflict
+bold	cowardly	conflict
+calm	anxious	conflict
+calm	moody	conflict
+lazy	energetic	conflict
+lazy	disciplined	conflict
+disorganized	perfectionist	conflict
+cruel	empathetic	conflict
+loner	outgoing	conflict
+shy	charismatic	conflict
+traditional	adventurous	conflict
+confident	shy	conflict
+confident	anxious	conflict
+confident	cowardly	conflict
+shy	talkative	conflict
+brave	protective	synergy	2
+loyal	protective	synergy	2
+curious	adventurous	synergy	2
+creative	imaginative	synergy	2.5
+curious	philosophical	synergy	2
+organized	perfectionist	synergy	2
+organized	disciplined	synergy	2
+hardworking	reliable	synergy	2
+kind	generous	synergy	2
+kind	empathetic	synergy	2.5
+outgoing	talkative	synergy	2.5
+outgoing	charismatic	synergy	2
+shy	quiet	synergy	2.5
+loner	quiet	synergy	2
+suspicious	cautious	synergy	2
+greedy	deceitful	synergy	1.5
+hot_tempered	impatient	synergy	2
+hot_tempered	moody	synergy	2
+anxious	pessimistic	synergy	2
+anxious	insecure	synergy	2
+optimistic	energetic	synergy	1.5
+confident	bold	synergy	2
+reckless	impulsive	synergy	2.5
+calm	patient	synergy	2
+resilient	stubborn	synergy	1.5
+traditional	loyal	synergy	1.5
+practical	hardworking	synergy	1.5
+humble	kind	synergy	1.5
+arrogant	stubborn	synergy	1.5
+cruel	hot_tempered	synergy	1.5

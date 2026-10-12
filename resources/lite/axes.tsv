@@ -1,0 +1,9 @@
+# Personality axes. Each person draws a base value from normal(mean, sd);
+# traits then add their loadings. The Big Five are standardised (mean 0,
+# sd 1). An axis with sd 0 starts at its mean and comes only from traits.
+axis	label	mean	sd
+openness	Openness	0	1
+conscientiousness	Conscientiousness	0	1
+extraversion	Extraversion	0	1
+agreeableness	Agreeableness	0	1
+neuroticism	Neuroticism	0	1

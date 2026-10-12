@@ -1,3 +1,5 @@
-The data in the resources/ directory is a sample written for this library.
-List each source here with its licence before the first release (see
-doc/data.md).
+The trait catalogue in the resources/ directory (traits, axes, loadings and
+relations) was written for this library and is released with it under the
+MIT License (see LICENSE.MIT). The directions of some Big Five loadings follow
+published adjective markers (Goldberg 1992; Saucier 1994); no data from those
+works is reproduced. See doc/data.md.

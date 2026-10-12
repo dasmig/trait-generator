@@ -1,0 +1,55 @@
+# Personality traits (curated; see doc/data.md). Traits that share a group
+# exclude each other. Tags are ';'-separated.
+trait	label	weight	group	tags
+curious	Curious	1	novelty	knowledge;exploration
+creative	Creative	1		art;crafting
+imaginative	Imaginative	1		art;dreaming
+philosophical	Philosophical	0.6		knowledge;faith
+adventurous	Adventurous	0.8		exploration;risk
+traditional	Traditional	1	novelty	faith;routine
+practical	Practical	1.2		crafting;survival
+organized	Organized	1	order	planning
+disorganized	Disorganized	0.8	order	chaos
+hardworking	Hardworking	1.2	diligence	labour
+lazy	Lazy	0.6	diligence	rest
+cautious	Cautious	1	caution	safety
+impulsive	Impulsive	0.8	caution	risk
+perfectionist	Perfectionist	0.6		crafting;planning
+disciplined	Disciplined	0.8		training;combat
+reliable	Reliable	1		duty
+outgoing	Outgoing	1	sociability	social
+shy	Shy	0.8	sociability	solitude
+talkative	Talkative	1	voice	social
+quiet	Quiet	1	voice	solitude
+energetic	Energetic	1		activity
+bold	Bold	0.8		leadership;risk
+charismatic	Charismatic	0.6		leadership;social
+loner	Loner	0.6		solitude;survival
+kind	Kind	1.2	kindness	care
+cruel	Cruel	0.3	kindness	violence
+trusting	Trusting	0.8	trust	social
+suspicious	Suspicious	0.8	trust	safety
+generous	Generous	1	generosity	care;trade
+greedy	Greedy	0.6	generosity	wealth;trade
+loyal	Loyal	1		duty;social
+honest	Honest	1.2	honesty	duty
+deceitful	Deceitful	0.4	honesty	stealth
+humble	Humble	0.8	humility	faith
+arrogant	Arrogant	0.6	humility	leadership
+empathetic	Empathetic	1		care;medicine
+stubborn	Stubborn	1		willpower
+protective	Protective	1		duty;combat
+calm	Calm	1	temper	rest
+hot_tempered	Hot-tempered	0.7	temper	violence;combat
+anxious	Anxious	0.8		safety
+optimistic	Optimistic	1	outlook	morale
+pessimistic	Pessimistic	0.8	outlook	safety
+confident	Confident	1	confidence	leadership
+insecure	Insecure	0.7	confidence	safety
+brave	Brave	0.9	courage	combat;risk
+cowardly	Cowardly	0.5	courage	safety;flight
+reckless	Reckless	0.5	courage	risk;combat
+patient	Patient	1	patience	waiting
+impatient	Impatient	0.8	patience	haste
+moody	Moody	0.7		morale
+resilient	Resilient	0.8		survival;willpower
