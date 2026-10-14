@@ -30,7 +30,7 @@ This guide covers every feature of the trait-generator library. For a quick over
 int main()
 {
     auto& gen = dasmig::trtg::instance();
-    std::cout << gen.get_personality() << '\n'; // e.g. "Curious, Patient, Outgoing"
+    std::cout << gen.get_personality(dasmig::trait_request{}) << '\n'; // e.g. "Curious, Patient, Outgoing"
 }
 ```
 
@@ -57,14 +57,19 @@ A directory must contain `traits.tsv`; `axes.tsv`, `loadings.tsv` and `relations
 ## Generating Personalities
 
 ```cpp
-auto p = gen.get_personality();      // three traits, seed from the instance engine
-auto q = gen.get_personality(1234);  // deterministic; does not touch the engine
+auto p = gen.get_personality(dasmig::trait_request{});       // three traits, random seed
+auto q = gen.get_personality(dasmig::trait_request{}, 1234); // deterministic
 
 // A request: how many traits, which must be present, which must not.
 dasmig::trait_request req{.count = 5, .include = {"brave", "loyal"}, .exclude = {"greedy"}};
 auto r = gen.get_personality(req);
 auto s = gen.get_personality(req, 1234);
 ```
+
+These are the only generation signatures: `(request)` and `(request, seed)`.
+The request defaults to `count = 3`, with empty `include` and `exclude` lists.
+Every call supplies its own choices; they never become defaults for later calls.
+Data loading and catalogue layers are configured on the instance.
 
 - `count` includes the forced traits. Fewer traits are returned when nothing else is compatible with those already chosen (a small catalogue with many conflicts).
 - `include` traits come first, in the order given, and the draw treats them as already chosen: their conflicts are skipped and their synergies apply. They must exist and must not conflict with each other.
@@ -139,16 +144,24 @@ gen.extend("mods/traits.tsv", dasmig::core::layer_mode::add);
 
 ## Seeding and Deterministic Generation
 
-- `get_personality(seed)` and `get_personality(request, seed)` give the same result for the same seed, request and data, on every platform.
-- `seed(s)` makes the instance engine deterministic, so a sequence of calls without a seed repeats; `unseed()` reseeds it from the system.
-- `p.seed()` is the seed a result was generated from: `get_personality(p.seed())` replays it (with the same request).
+- `get_personality(request, seed)` gives the same result for the same seed, request and data, on every platform, without advancing the instance engine.
+- `get_personality(request)` draws a fresh seed from the instance engine, initially seeded from system entropy. There are no generator-level `seed()` or `unseed()` controls.
+- For deterministic sequences, manage a `dasmig::core::rng` in the caller and pass its next value as the seed: `gen.get_personality(request, rng())`.
+- `p.seed()` is the seed a result was generated from: `get_personality(request, p.seed())` replays it with the same request and data. The signature does not store the request; keep it alongside the result when replay is needed.
+
+### Migrating legacy calls
+
+Replace `get_personality()` with `get_personality(dasmig::trait_request{})` and
+`get_personality(seed)` with `get_personality(dasmig::trait_request{}, seed)`.
+Replace instance `seed()` / `unseed()` calls with explicit per-call seeds (or
+a caller-owned `dasmig::core::rng` for sequences).
 
 ## Replay and JSON
 
 Every result records the seed and the data it came from:
 
 ```cpp
-auto p = gen.get_personality();
+auto p = gen.get_personality(dasmig::trait_request{});
 p.signature().seed; // the call seed
 p.signature().data; // gen.data_hash() when it was generated
 ```
@@ -174,7 +187,7 @@ Define `DASMIG_TRAIT_EMBED` before including the header to compile the catalogue
 
 ## Thread Safety
 
-Each `trtg` instance is independent. Concurrent calls to `get_personality()` on the **same** instance require external synchronisation (e.g. a `std::mutex`). The seeded overloads are `const` and do not touch the engine.
+Each `trtg` instance is independent. Concurrent calls to `get_personality(request)` on the **same** instance require external synchronisation (e.g. a `std::mutex`). The `(request, seed)` overload is `const` and does not touch the engine. Data loading and extension must not run concurrently with generation.
 
 ## Error Reference
 

@@ -123,8 +123,8 @@ TEST_CASE("the singleton loads data on first use", "[loading]")
 TEST_CASE("get_personality throws when no data is loaded", "[generation]")
 {
     dasmig::trtg gen;
-    REQUIRE_THROWS_AS(gen.get_personality(), std::runtime_error);
-    REQUIRE_THROWS_AS(gen.get_personality(std::uint64_t{1}), std::runtime_error);
+    REQUIRE_THROWS_AS(gen.get_personality(dasmig::trait_request{}), std::runtime_error);
+    REQUIRE_THROWS_AS(gen.get_personality(dasmig::trait_request{}, std::uint64_t{1}), std::runtime_error);
 }
 
 TEST_CASE("a personality has three distinct traits and every axis", "[generation]")
@@ -132,7 +132,7 @@ TEST_CASE("a personality has three distinct traits and every axis", "[generation
     const auto gen = make_loaded_generator();
     for (std::uint64_t s = 0; s < 500; ++s)
     {
-        const auto p = gen.get_personality(s);
+        const auto p = gen.get_personality(dasmig::trait_request{}, s);
         REQUIRE(p.traits.size() == 3);
         REQUIRE(keys(p).size() == 3);
         REQUIRE(p.axes.size() == 5);
@@ -145,28 +145,28 @@ TEST_CASE("get_personality with a seed is deterministic", "[generation][seed]")
     const auto gen = make_loaded_generator();
     for (std::uint64_t s = 0; s < 100; ++s)
     {
-        REQUIRE(gen.get_personality(s).to_json() == gen.get_personality(s).to_json());
+        REQUIRE(gen.get_personality(dasmig::trait_request{}, s).to_json() ==
+                gen.get_personality(dasmig::trait_request{}, s).to_json());
     }
 }
 
 TEST_CASE("a result replays from its seed", "[generation][seed]")
 {
     auto gen = make_loaded_generator();
-    const auto p = gen.get_personality();
-    REQUIRE(gen.get_personality(p.seed()).to_json() == p.to_json());
+    const dasmig::trait_request defaults{};
+    const auto p = gen.get_personality(defaults);
+    REQUIRE(gen.get_personality(defaults, p.seed()).to_json() == p.to_json());
     const dasmig::trait_request req{.count = 5, .include = {"brave"}, .exclude = {}};
     const auto q = gen.get_personality(req);
     REQUIRE(gen.get_personality(req, q.seed()).to_json() == q.to_json());
 }
 
-TEST_CASE("seed and unseed control the instance engine", "[seed]")
+TEST_CASE("explicit per-call seeds replay across generator instances", "[seed]")
 {
-    auto gen = make_loaded_generator();
-    gen.seed(42);
-    const auto a = gen.get_personality().to_json();
-    gen.seed(42);
-    REQUIRE(gen.get_personality().to_json() == a);
-    REQUIRE(&gen.unseed() == &gen);
+    const auto first = make_loaded_generator();
+    const auto second = make_loaded_generator();
+    const dasmig::trait_request request{.count = 4, .include = {"brave"}, .exclude = {"greedy"}};
+    REQUIRE(first.get_personality(request, 42).to_json() == second.get_personality(request, 42).to_json());
 }
 
 TEST_CASE("shipped conflicts and groups never appear together", "[generation][rules]")
@@ -307,7 +307,7 @@ TEST_CASE("Big Five base values are standard normal", "[axes][stats]")
     std::vector<double> sum2(5, 0.0);
     for (std::uint64_t s = 0; s < draws; ++s)
     {
-        const auto p = gen.get_personality(s);
+        const auto p = gen.get_personality(dasmig::trait_request{}, s);
         for (std::size_t a = 0; a < 5; ++a)
         {
             sum[a] += p.axes[a].base;
@@ -334,7 +334,7 @@ TEST_CASE("traits follow the axes they load on", "[axes][stats]")
     int n_without = 0;
     for (std::uint64_t s = 0; s < 10000; ++s)
     {
-        const auto p = gen.get_personality(s);
+        const auto p = gen.get_personality(dasmig::trait_request{}, s);
         const double c = p.axes[1].base;
         if (p.has("organized"))
         {
@@ -381,11 +381,11 @@ TEST_CASE("known answers for fixed seeds", "[kat]")
     REQUIRE(gen.has_data());
     REQUIRE(gen.data_hash() == 0xff9364ce0749f37cULL);
 
-    REQUIRE(gen.get_personality(std::uint64_t{1}).to_json() ==
+    REQUIRE(gen.get_personality(dasmig::trait_request{}, std::uint64_t{1}).to_json() ==
             R"({"traits":[{"key":"calm","label":"Calm","group":"temper","tags":["rest"]},{"key":"resilient","label":"Resilient","group":null,"tags":["survival","willpower"]},{"key":"traditional","label":"Traditional","group":"novelty","tags":["faith","routine"]}],)"
             R"("axes":{"openness":-2.001703471338275,"conscientiousness":0.16975813928315747,"extraversion":-0.2986160095442788,"agreeableness":-0.10037693181376535,"neuroticism":-1.157169454751688},)"
             R"("signature":{"seed":"0000000000000001","data":"ff9364ce0749f37c"}})");
-    REQUIRE(gen.get_personality(std::uint64_t{2}).to_json() ==
+    REQUIRE(gen.get_personality(dasmig::trait_request{}, std::uint64_t{2}).to_json() ==
             R"({"traits":[{"key":"curious","label":"Curious","group":"novelty","tags":["knowledge","exploration"]},{"key":"patient","label":"Patient","group":"patience","tags":["waiting"]},{"key":"outgoing","label":"Outgoing","group":"sociability","tags":["social"]}],)"
             R"("axes":{"openness":1.2592971859088102,"conscientiousness":0.032864413410737425,"extraversion":1.954276507241222,"agreeableness":0.04393141673821327,"neuroticism":-0.6908067147486393},)"
             R"("signature":{"seed":"0000000000000002","data":"ff9364ce0749f37c"}})");
@@ -399,7 +399,7 @@ TEST_CASE("known answers for fixed seeds", "[kat]")
     std::uint64_t h = 0xcbf29ce484222325ULL;
     for (std::uint64_t s = 0; s < 10000; ++s)
     {
-        for (const char c : gen.get_personality(s).to_json())
+        for (const char c : gen.get_personality(dasmig::trait_request{}, s).to_json())
         {
             h ^= static_cast<unsigned char>(c);
             h *= 0x100000001b3ULL;
@@ -444,7 +444,7 @@ TEST_CASE("extend adds, overrides and removes traits", "[extend]")
 {
     auto gen = make_loaded_generator();
     const auto base_hash = gen.data_hash();
-    const auto before = gen.get_personality(std::uint64_t{7});
+    const auto before = gen.get_personality(dasmig::trait_request{}, std::uint64_t{7});
 
     const auto& info = gen.extend_from_string(table::traits,
                                               "trait\tlabel\tweight\tgroup\ttags\n"
@@ -456,7 +456,7 @@ TEST_CASE("extend adds, overrides and removes traits", "[extend]")
     REQUIRE(gen.trait_count() == 53);
     REQUIRE(gen.data_hash() != base_hash);
     REQUIRE(gen.layers(table::traits).size() == 2);
-    REQUIRE(gen.get_personality(std::uint64_t{7}).signature().data == gen.data_hash());
+    REQUIRE(gen.get_personality(dasmig::trait_request{}, std::uint64_t{7}).signature().data == gen.data_hash());
 
     // A game axis with no base spread, fed by the new trait.
     gen.extend_from_string(table::axes, "axis\tlabel\tmean\tsd\nscavenging\tScavenging\t0\t0\n", "axes.tsv");
@@ -464,7 +464,7 @@ TEST_CASE("extend adds, overrides and removes traits", "[extend]")
     int seen = 0;
     for (std::uint64_t s = 0; s < 300; ++s)
     {
-        const auto p = gen.get_personality(s);
+        const auto p = gen.get_personality(dasmig::trait_request{}, s);
         REQUIRE_FALSE(p.has("greedy")); // weight 0
         REQUIRE(p.value("scavenging") == (p.has("scavenger") ? 1.0 : 0.0));
         seen += p.has("scavenger") ? 1 : 0;
@@ -480,7 +480,7 @@ TEST_CASE("extend adds, overrides and removes traits", "[extend]")
     // Reloading the base drops every layer.
     REQUIRE(gen.load(dasmig::dataset::lite));
     REQUIRE(gen.data_hash() == base_hash);
-    REQUIRE(gen.get_personality(std::uint64_t{7}).to_json() == before.to_json());
+    REQUIRE(gen.get_personality(dasmig::trait_request{}, std::uint64_t{7}).to_json() == before.to_json());
 }
 
 TEST_CASE("unresolved lists misspelt names", "[extend]")
@@ -573,7 +573,7 @@ TEST_CASE("compiled-in data needs no files and matches them", "[embed]")
     REQUIRE(loaded);
     REQUIRE(gen.layers(table::traits).front().source == "embedded:lite/traits.tsv");
     REQUIRE(gen.data_hash() == 0xff9364ce0749f37cULL); // same as the files
-    REQUIRE(gen.get_personality(std::uint64_t{1}).to_json() ==
+    REQUIRE(gen.get_personality(dasmig::trait_request{}, std::uint64_t{1}).to_json() ==
             R"({"traits":[{"key":"calm","label":"Calm","group":"temper","tags":["rest"]},{"key":"resilient","label":"Resilient","group":null,"tags":["survival","willpower"]},{"key":"traditional","label":"Traditional","group":"novelty","tags":["faith","routine"]}],)"
             R"("axes":{"openness":-2.001703471338275,"conscientiousness":0.16975813928315747,"extraversion":-0.2986160095442788,"agreeableness":-0.10037693181376535,"neuroticism":-1.157169454751688},)"
             R"("signature":{"seed":"0000000000000001","data":"ff9364ce0749f37c"}})");
