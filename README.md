@@ -25,7 +25,7 @@ Personality traits from a weighted catalogue with conflicts, synergies and Big F
 
 - **Requests**. Ask for any number of traits, force some in (`include`) and keep others out (`exclude`); the rest stay consistent with them.
 
-- **Deterministic Seeding**. Per-call `get_personality(seed)` for reproducible results, generator-level `seed()` / `unseed()` for deterministic sequences, and `personality::seed()` for replaying a previous generation.
+- **Deterministic Seeding**. Per-call `get_personality(request, seed)` for reproducible results, and `personality::seed()` for replaying a previous generation with the same request and data.
 
 - **Identical Everywhere**. A seed gives the same personality on every compiler, standard library and CPU (GCC, Clang, MSVC, Emscripten; x86-64 and ARM64), checked by known-answer tests.
 
@@ -51,21 +51,27 @@ to the files you want to use it in, and supply the [`resources`](https://github.
 
 auto& gen = dasmig::trtg::instance(); // loads the catalogue
 
-auto p = gen.get_personality();       // three traits
+auto p = gen.get_personality(dasmig::trait_request{}); // three traits
 std::cout << p << '\n';               // "Calm, Resilient, Traditional"
 p.has("brave");                       // false
 p.value("neuroticism");               // resolved axis value
 p.tags();                             // {"rest", "survival", "willpower", ...}
 
 // Five traits, one forced in, one kept out.
-auto q = gen.get_personality({.count = 5, .include = {"brave"}, .exclude = {"greedy"}});
+const dasmig::trait_request request{.count = 5, .include = {"brave"}, .exclude = {"greedy"}};
+auto q = gen.get_personality(request);
 
 // The same seed gives the same personality everywhere.
-auto again = gen.get_personality(p.seed());
+auto again = gen.get_personality(request, q.seed());
 std::cout << again.to_json() << '\n';
 ```
 
 See the [usage guide](doc/usage.md) for extending the catalogue and the generation model in detail.
+
+Generation always takes a `trait_request`: `get_personality(request)` or
+`get_personality(request, seed)`. Its defaults are three traits with no inclusions
+or exclusions; no generation choices are stored on the generator. Data loading
+and catalogue layers remain instance-level.
 
 ## Building
 

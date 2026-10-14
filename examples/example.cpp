@@ -27,12 +27,13 @@ int main()
     std::cout << "Loaded " << gen.trait_count() << " traits and " << gen.axis_count() << " axes.\n\n";
 
     std::cout << "Random personalities:\n";
-    for (int i = 0; i < 3; ++i) print(gen.get_personality());
+    for (int i = 0; i < 3; ++i) print(gen.get_personality(dasmig::trait_request{}));
 
     std::cout << "\nFive traits, brave included, greedy left out:\n";
     print(gen.get_personality(dasmig::trait_request{.count = 5, .include = {"brave"}, .exclude = {"greedy"}}));
 
-    std::cout << "\nSeed 42, as JSON:\n  " << gen.get_personality(std::uint64_t{42}).to_json() << '\n';
+    std::cout << "\nSeed 42, as JSON:\n  "
+              << gen.get_personality(dasmig::trait_request{}, std::uint64_t{42}).to_json() << '\n';
 
     // A game adds its own trait and an axis its AI reads; neither needs a
     // change to the library.
@@ -45,7 +46,7 @@ int main()
     std::cout << "\nWith the game's layers:\n";
     for (int i = 0; i < 3; ++i)
     {
-        const auto p = gen.get_personality();
+        const auto p = gen.get_personality(dasmig::trait_request{});
         std::cout << std::format("  {:<40} risk={:+.1f}\n", p.to_string(), p.value("risk").value_or(0.0));
     }
     return 0;

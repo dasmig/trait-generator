@@ -119,8 +119,8 @@ class personality
     }
 
     /// @brief Retrieve the random seed used to generate this personality.
-    /// @return The call seed; pass it to a seeded get_personality()
-    ///         overload to generate the same personality again.
+    /// @return The call seed; pass it to get_personality(request, seed)
+    ///         with the same request and data to replay this personality.
     [[nodiscard]] std::uint64_t seed() const { return _signature.seed; }
 
     /// @brief The seed and the data this personality was generated from.
@@ -259,24 +259,8 @@ class trtg
 
     // -- Generation -------------------------------------------------------
 
-    /// @brief Generate a random personality with three traits.
-    /// @return The personality.
-    /// @throws std::runtime_error If no data has been loaded.
-    [[nodiscard]] personality get_personality()
-    {
-        return generate_(trait_request{}, draw_seed_());
-    }
-
-    /// @brief Generate a deterministic personality with three traits.
-    /// @param call_seed Seed; the same seed and data give the same result.
-    /// @return The personality.
-    /// @throws std::runtime_error If no data has been loaded.
-    [[nodiscard]] personality get_personality(std::uint64_t call_seed) const
-    {
-        return generate_(trait_request{}, call_seed);
-    }
-
     /// @brief Generate a random personality as requested.
+    ///        Use trait_request{} for three traits without constraints.
     /// @param request Count, and traits to include or leave out.
     /// @return The personality.
     /// @throws std::runtime_error If no data has been loaded.
@@ -299,26 +283,6 @@ class trtg
                                               std::uint64_t call_seed) const
     {
         return generate_(request, call_seed);
-    }
-
-    // -- Seeding ----------------------------------------------------------
-
-    /// @brief Seed the internal random engine for deterministic
-    ///        sequences.
-    /// @param seed_value Seed.
-    /// @return `*this`.
-    trtg& seed(std::uint64_t seed_value)
-    {
-        _engine.seed(seed_value);
-        return *this;
-    }
-
-    /// @brief Reseed the engine with a non-deterministic source.
-    /// @return `*this`.
-    trtg& unseed()
-    {
-        _engine.unseed();
-        return *this;
     }
 
     // -- Catalogue --------------------------------------------------------
