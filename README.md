@@ -78,6 +78,7 @@ and catalogue layers remain instance-level.
 ```bash
 make            # example
 make test       # tests
+make bench      # benchmarks, results in build/bench.tsv
 make test-embed # tests with the catalogue compiled in
 make coverage   # code coverage
 make lint       # clang-tidy
