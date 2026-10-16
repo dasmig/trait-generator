@@ -19,6 +19,8 @@ Personality traits from a weighted catalogue with conflicts, synergies and Big F
 
 - **Coherent Personalities**. Traits are drawn one at a time: traits that conflict with one already chosen (brave and cowardly, calm and anxious) are skipped, and synergies (kind and generous, shy and quiet) make related traits likelier.
 
+- **Batch Generation**. Generate thousands of results from one seed, on several threads with the same output for any thread count, optionally unique by a key, and stream them as JSON Lines or CSV (see the usage guide).
+
 - **Big Five Axes**. Each person draws openness, conscientiousness, extraversion, agreeableness and neuroticism, and traits that match them are likelier: a conscientious person tends to be organized. The chosen traits then shift the axes, giving a resolved vector a game AI can read.
 
 - **A Catalogue That Is Data**. 52 curated traits with groups, tags, axis loadings and relations, in four TSV tables. A game adds its own traits, axes (for example "risk taking" for a utility AI) and relations as layers, without touching the library.
