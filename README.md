@@ -31,9 +31,13 @@ Personality traits from a weighted catalogue with conflicts, synergies and Big F
 
 - **Identical Everywhere**. A seed gives the same personality on every compiler, standard library and CPU (GCC, Clang, MSVC, Emscripten; x86-64 and ARM64), checked by known-answer tests.
 
+- **Extensible Data**. Load your own TSV layers on top of the shipped catalogue to add, change or remove traits, axes and relations (`extend()`), checked before they are applied.
+
 - **JSON and Replay**. `to_json()` on every result, and a `signature()` recording the seed and the data it came from.
 
 - **Compiled-in Data**. Define `DASMIG_TRAIT_EMBED` to build the catalogue into the program, for WebAssembly and other builds without files.
+
+- **Multi-Instance Support**. Construct independent `trtg` instances with their own catalogue and random engine.
 
 ## Integration
 
